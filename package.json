@@ -1,0 +1,68 @@
+{
+  "name": "kanana-video-editor-desktop",
+  "version": "1.0.0",
+  "description": "動画編集・切り抜き（Windowsデスクトップ版・ネイティブffmpeg同梱・完全オフライン）",
+  "main": "main.js",
+  "author": "Kanana Studio",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.kananagames.videoeditor.desktop",
+    "productName": "Kanana Video Editor",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "ffargs.js",
+      "preload.js",
+      "renderer/**/*",
+      "build/icon.ico",
+      "node_modules/ffmpeg-static/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**/*"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "KananaVideoEditor-Setup-${version}.exe",
+      "shortcutName": "Kanana 動画編集",
+      "uninstallDisplayName": "Kanana 動画編集（デスクトップ版）",
+      "unicode": true,
+      "multiLanguageInstaller": true,
+      "displayLanguageSelector": true,
+      "installerLanguages": [
+        "ja_JP",
+        "en_US"
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CyCats613/kanana-video-editor-desktop"
+  }
+}
