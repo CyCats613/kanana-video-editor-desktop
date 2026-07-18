@@ -1,9 +1,9 @@
 "use strict";
-/* レンダラへ最小限のAPIだけを公開する（contextIsolation: true） */
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
-  pickInput: () => ipcRenderer.invoke("pick-input"),
+  pick: (kind) => ipcRenderer.invoke("pick", kind),            // {path,name,size,media}
+  allowMedia: (p) => ipcRenderer.invoke("allow-media", p),     // D&D したファイルを配信許可
   pickOutput: (defaultName) => ipcRenderer.invoke("pick-output", defaultName),
   run: (opt) => ipcRenderer.invoke("run", opt),
   cancel: () => ipcRenderer.invoke("cancel"),

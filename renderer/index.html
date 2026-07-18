@@ -2,113 +2,180 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; media-src kmedia: 'self'; img-src kmedia: 'self' data:">
 <title>Kanana 動画編集</title>
 <style>
-:root{--bg:#f6f4ec;--panel:#fffdf6;--panel2:#fbf8ef;--border:#e3ddcd;--hair:#eae4d6;--accent:#267b7d;--accent2:#1d6365;--ink:#33362f;--muted:#7d8177;--muted2:#9c9a8c;--red:#c0392b;--radius:16px;
---mono:ui-monospace,"SF Mono",Consolas,monospace;--sans:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
+:root{--bg:#f6f4ec;--panel:#fffdf6;--panel2:#fbf8ef;--border:#e3ddcd;--hair:#eae4d6;--accent:#267b7d;--accent2:#1d6365;--ink:#33362f;--muted:#7d8177;--muted2:#9c9a8c;--red:#c0392b;--radius:14px;--mono:ui-monospace,Consolas,monospace;--sans:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.65}
-header{height:52px;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
-.logo{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--accent)}
-.logo span{color:var(--muted);font-weight:400}
-.badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--muted);background:var(--panel2)}
-.badge.on{color:var(--accent);border-color:var(--accent)}
-main{max-width:1000px;margin:0 auto;padding:20px;display:grid;gap:14px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-h2{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:8px 0 4px}
-input,select{width:100%;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--ink);font:inherit;padding:9px 10px;outline:none}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(38,123,125,.18)}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13.5px;line-height:1.6}
+header{height:50px;display:flex;align-items:center;gap:10px;padding:0 18px;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.logo{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent)}.logo span{color:var(--muted);font-weight:400}
+.badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);background:var(--panel2)}
+main{max-width:1040px;margin:0 auto;padding:16px;display:grid;gap:12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+h2{font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+h3{font-size:12.5px;color:var(--ink);margin:12px 0 6px;font-weight:700}
+label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin:7px 0 3px}
+input,select{width:100%;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink);font:inherit;padding:8px 9px;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(38,123,125,.16)}
+input[type=range]{padding:0;accent-color:var(--accent)}
 input[type=checkbox]{width:auto;inline-size:16px;block-size:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer}
-label.check{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink);cursor:pointer;margin:10px 0}
-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:9px 16px;border-radius:10px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+input[type=color]{padding:2px;height:36px;cursor:pointer}
+label.check{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink);cursor:pointer;margin:8px 0}
+button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:8px 14px;border-radius:9px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
 button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 button:disabled{opacity:.45;cursor:default}
-.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.primary:hover:not(:disabled){background:var(--accent2);color:#fff}
+.primary{background:var(--accent);border-color:var(--accent);color:#fff}.primary:hover:not(:disabled){background:var(--accent2);color:#fff}
 .danger{color:var(--red);border-color:#e7b1b1}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.muted{color:var(--muted2);font-size:12px}
-.drop{border:2px dashed var(--border);border-radius:var(--radius);padding:26px;text-align:center;cursor:pointer;transition:.15s;background:var(--panel2)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.muted{color:var(--muted2);font-size:11.5px}
+.drop{border:2px dashed var(--border);border-radius:var(--radius);padding:22px;text-align:center;cursor:pointer;background:var(--panel2);transition:.15s}
 .drop:hover,.drop.active{border-color:var(--accent);background:#f2f7f4}
-.drop .big{font-size:28px;margin-bottom:6px}
-.file{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:10px}
-.file b{overflow-wrap:anywhere}
-.bar{height:8px;background:var(--hair);border-radius:99px;overflow:hidden;margin:10px 0 6px}
-.bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .2s}
-pre{white-space:pre-wrap;overflow:auto;max-height:180px;background:#101827;color:#e7edf8;border-radius:12px;padding:10px;font-family:var(--mono);font-size:11px;line-height:1.5}
-pre:empty{display:none}
-.ok{color:var(--accent);font-weight:700}
-.err{color:var(--red);font-weight:700}
-.hint{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--muted)}
+video{width:100%;max-height:340px;background:#000;border-radius:10px;display:block}
+.tl{margin-top:8px}
+.tl .bar{position:relative;height:26px;background:var(--hair);border-radius:8px;overflow:hidden;cursor:pointer}
+.tl .sel{position:absolute;top:0;bottom:0;background:rgba(38,123,125,.28);border-left:2px solid var(--accent);border-right:2px solid var(--accent)}
+.tl .cur{position:absolute;top:0;bottom:0;width:2px;background:var(--red)}
+.rng{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+.val{font-family:var(--mono);font-size:11px;color:var(--accent)}
+details{border:1px solid var(--border);border-radius:10px;padding:0;margin:8px 0;overflow:hidden}
+details>summary{padding:10px 12px;cursor:pointer;font-weight:700;font-size:12.5px;color:var(--ink);background:var(--panel2);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--accent)}
+details[open]>summary::before{content:"▾ "}
+details>.body{padding:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11.5px}
+.bar2{height:8px;background:var(--hair);border-radius:99px;overflow:hidden;margin:10px 0 6px}.bar2>i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+pre{white-space:pre-wrap;overflow:auto;max-height:150px;background:#101827;color:#e7edf8;border-radius:10px;padding:9px;font-family:var(--mono);font-size:10.5px}pre:empty{display:none}
+.ok{color:var(--accent);font-weight:700}.err{color:var(--red);font-weight:700}
+.hide{display:none}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
 <header>
   <span class="logo">Kanana<span> 動画編集</span></span>
-  <span class="badge on" id="engineBadge">ネイティブffmpeg同梱</span>
-  <span class="badge">完全オフライン</span>
+  <span class="badge">ネイティブffmpeg・完全オフライン</span>
 </header>
 <main>
+  <!-- STEP 1: 元動画 + プレビュー -->
   <div class="card">
-    <h2>STEP 1 — 動画を選ぶ</h2>
+    <h2>STEP 1 — 元動画を選ぶ</h2>
     <div class="drop" id="drop">
-      <div class="big">🎬</div>
+      <div style="font-size:26px">🎬</div>
       <div><b>クリックして選ぶ</b>か、ここにドラッグ＆ドロップ</div>
-      <div class="muted">mp4 / mov / avi / mkv / webm など。ファイルは端末内だけで処理されます</div>
+      <div class="muted">mp4 / mov / avi / mkv / webm など・端末内だけで処理します</div>
     </div>
-    <div class="file" id="fileBox" style="display:none">
-      <span>📄</span><b id="fileName"></b><span class="muted" id="fileSize"></span>
+    <div id="player" class="hide">
+      <video id="vid" controls></video>
+      <div class="tl">
+        <div class="bar" id="tlBar"><div class="sel" id="tlSel"></div><div class="cur" id="tlCur"></div></div>
+        <div class="rng"><span id="tStart">開始 0.00s</span><span id="tCur">0.00s</span><span id="tEnd">終了 —</span></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="setStart">⏮ 今の位置を「開始」に</button>
+        <button id="setEnd">⏭ 今の位置を「終了」に</button>
+        <button id="clearTrim">切り抜き解除</button>
+        <span class="pill" id="fileMeta"></span>
+      </div>
+      <div class="g3" style="margin-top:8px">
+        <div><label>開始（秒）</label><input id="start" type="number" min="0" step="0.1" placeholder="0"></div>
+        <div><label>終了（秒）</label><input id="end" type="number" min="0" step="0.1" placeholder="末尾"></div>
+        <div><label>横幅(px)・空欄で元のまま</label><input id="width" type="number" min="16" step="2" placeholder="例:1280"></div>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <h2>STEP 2 — やることを決める</h2>
-    <div class="grid2">
-      <div>
-        <label for="mode">処理</label>
-        <select id="mode">
-          <option value="video">動画を書き出す（切り抜き・リサイズ・圧縮）</option>
-          <option value="copy">切り抜きだけ（無劣化・一瞬で終わる）</option>
-          <option value="audio">音声を抜き出す（m4a）</option>
-          <option value="thumb">サムネイル画像（jpg）</option>
-          <option value="gif">GIFにする</option>
-        </select>
+  <!-- STEP 2: 編集 -->
+  <div class="card" id="editCard">
+    <h2>STEP 2 — 編集（使う項目だけ触ればOK・空欄はそのまま）</h2>
+
+    <details><summary>🎚 映像の調節</summary><div class="body">
+      <div class="g3">
+        <div><label>明るさ <span class="val" id="vBrightness">0</span></label><input id="brightness" type="range" min="-0.5" max="0.5" step="0.02" value="0"></div>
+        <div><label>コントラスト <span class="val" id="vContrast">1.0</span></label><input id="contrast" type="range" min="0.3" max="2" step="0.05" value="1"></div>
+        <div><label>彩度 <span class="val" id="vSaturation">1.0</span></label><input id="saturation" type="range" min="0" max="2.5" step="0.05" value="1"></div>
       </div>
-      <div>
-        <label for="width">横幅(px)・空欄で元のまま</label>
-        <input id="width" type="number" min="16" step="2" placeholder="例: 1280">
+      <div class="g3" style="margin-top:8px">
+        <div><label>再生速度 <span class="val" id="vSpeed">1.0x</span></label><input id="speed" type="range" min="0.25" max="4" step="0.05" value="1"></div>
+        <div><label>回転</label><select id="rotate"><option value="0">なし</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></div>
+        <div><label>反転</label><select id="flip"><option value="none">なし</option><option value="h">左右</option><option value="v">上下</option></select></div>
       </div>
-    </div>
-    <div class="grid3">
-      <div><label for="start">開始（秒 または 00:01:23）</label><input id="start" placeholder="例: 5"></div>
-      <div><label for="end">終了（秒 または 00:02:00）</label><input id="end" placeholder="例: 65"></div>
-      <div id="qBox"><label for="crf">画質（小さいほど高画質・23が標準）</label><input id="crf" type="number" min="0" max="51" value="23"></div>
-    </div>
-    <div id="presetBox">
-      <label for="preset">エンコード速度</label>
-      <select id="preset">
-        <option value="veryfast" selected>veryfast（速い・標準）</option>
-        <option value="medium">medium（バランス）</option>
-        <option value="slow">slow（低速・高圧縮）</option>
+      <div class="g2" style="margin-top:8px">
+        <div><label>フェードイン（秒）</label><input id="fadeIn" type="number" min="0" step="0.1" placeholder="0"></div>
+        <div><label>フェードアウト（秒）</label><input id="fadeOut" type="number" min="0" step="0.1" placeholder="0"></div>
+      </div>
+    </div></details>
+
+    <details><summary>🔊 音声</summary><div class="body">
+      <label>音声の扱い</label>
+      <select id="audioMode">
+        <option value="keep">元の音声そのまま</option>
+        <option value="bgm">BGMを追加（元音声とミックス）</option>
+        <option value="replace">音声を差し替え</option>
+        <option value="mute">消音</option>
       </select>
-    </div>
-    <p class="hint" id="modeHint" style="margin-top:10px"></p>
+      <div id="audioFileRow" class="hide" style="margin-top:8px">
+        <label>音声ファイル</label>
+        <div class="row"><button id="pickAudio">🎵 音声/動画を選ぶ</button><span class="pill" id="audioName">未選択</span></div>
+      </div>
+      <div class="g2" style="margin-top:8px">
+        <div><label>音量（元/主） <span class="val" id="vVolume">1.0</span></label><input id="volume" type="range" min="0" max="3" step="0.1" value="1"></div>
+        <div id="bgmVolRow" class="hide"><label>BGM音量 <span class="val" id="vBgm">0.5</span></label><input id="bgmVolume" type="range" min="0" max="2" step="0.1" value="0.5"></div>
+      </div>
+      <label class="check"><input id="normalize" type="checkbox"> 音量を自動でならす（ノーマライズ）</label>
+    </div></details>
+
+    <details><summary>🖼 重ね（別動画・画像・テロップ）</summary><div class="body">
+      <label>重ねるもの</label>
+      <select id="overlayMode">
+        <option value="none">なし</option>
+        <option value="video">別動画をワイプ表示（PiP）</option>
+        <option value="image">画像・ロゴを透かす</option>
+        <option value="text">テロップ（文字）</option>
+      </select>
+      <div id="overlayFileRow" class="hide" style="margin-top:8px">
+        <div class="row"><button id="pickOverlay">📁 動画/画像を選ぶ</button><span class="pill" id="overlayName">未選択</span></div>
+      </div>
+      <div id="overlayPosRow" class="hide g2" style="margin-top:8px">
+        <div><label>位置</label><select id="overlayPos"><option value="br">右下</option><option value="bl">左下</option><option value="tr">右上</option><option value="tl">左上</option><option value="center">中央</option></select></div>
+        <div><label>大きさ（元動画に対する％） <span class="val" id="vOvSize">30</span></label><input id="overlaySize" type="range" min="8" max="80" step="1" value="30"></div>
+      </div>
+      <div id="textRow" class="hide" style="margin-top:8px">
+        <label>テロップ文字</label><input id="text" type="text" placeholder="例: Kanana Studio">
+        <div class="g3" style="margin-top:8px">
+          <div><label>位置</label><select id="textPos"><option value="bl">左下</option><option value="br">右下</option><option value="tl">左上</option><option value="tr">右上</option><option value="center">中央</option></select></div>
+          <div><label>文字サイズ <span class="val" id="vTextSize">36</span></label><input id="textSize" type="range" min="16" max="96" step="2" value="36"></div>
+          <div><label>色</label><input id="textColor" type="color" value="#ffcc00"></div>
+        </div>
+      </div>
+    </div></details>
   </div>
 
+  <!-- STEP 3: 書き出し -->
   <div class="card">
-    <h2>STEP 3 — 実行</h2>
-    <div class="row">
-      <button class="primary" id="run" disabled>▶ 保存先を選んで実行</button>
-      <button class="danger" id="cancel" disabled>■ 中止</button>
-      <button id="openOut" style="display:none">📂 保存先を開く</button>
+    <h2>STEP 3 — 書き出し</h2>
+    <div class="g2">
+      <div><label>画質（小さいほど高画質・23が標準） <span class="val" id="vCrf">23</span></label><input id="crf" type="range" min="16" max="34" step="1" value="23"></div>
+      <div><label>エンコード速度</label><select id="preset"><option value="veryfast" selected>veryfast（速い・標準）</option><option value="medium">medium（バランス）</option><option value="slow">slow（低速・高圧縮）</option></select></div>
     </div>
-    <div class="bar"><i id="barFill"></i></div>
-    <div class="row"><span id="status" class="muted">動画を選ぶと実行できます。</span><span class="muted" id="speed" style="margin-left:auto"></span></div>
-    <details style="margin-top:10px"><summary class="muted" style="cursor:pointer">詳細ログ</summary><pre id="log"></pre></details>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="run" disabled>▶ 保存先を選んで書き出す（mp4）</button>
+      <button class="danger" id="cancel" disabled>■ 中止</button>
+      <button id="openOut" class="hide">📂 保存先を開く</button>
+    </div>
+    <div class="bar2"><i id="barFill"></i></div>
+    <div class="row"><span id="status" class="muted">動画を選ぶと書き出せます。</span><span class="muted" id="speedTxt" style="margin-left:auto"></span></div>
+
+    <h3 style="margin-top:14px">かんたん変換（切り抜き範囲を使います）</h3>
+    <div class="quick">
+      <button data-quick="copy">✂ 無劣化で切り抜き</button>
+      <button data-quick="audio">🎵 音声を抽出(m4a)</button>
+      <button data-quick="thumb">🖼 サムネイル(jpg)</button>
+      <button data-quick="gif">✨ GIFにする</button>
+    </div>
+    <details style="margin-top:10px"><summary class="muted" style="font-weight:400">詳細ログ</summary><div class="body"><pre id="log"></pre></div></details>
   </div>
 </main>
 <script src="app.js"></script>
