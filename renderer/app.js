@@ -68,6 +68,16 @@ $("overlayMode").onchange = () => {
   $("overlayFileRow").classList.toggle("hide", !(m === "video" || m === "image"));
   $("overlayPosRow").classList.toggle("hide", !(m === "video" || m === "image"));
   $("textRow").classList.toggle("hide", m !== "text");
+  $("overlayTimeRow").classList.toggle("hide", m === "none");
+};
+/* 出力フォーマットで音声のみ/映像を出し分け（音声のみは画質/速度/比率を隠す） */
+const AUDIO_FMT = ["mp3", "m4a", "wav", "aac"];
+$("outFormat").onchange = () => {
+  const audioOnly = AUDIO_FMT.includes($("outFormat").value);
+  $("crfBox").style.visibility = audioOnly ? "hidden" : "visible";
+  $("presetBox").style.display = audioOnly ? "none" : "";
+  $("aspect").disabled = audioOnly;
+  $("run").textContent = audioOnly ? "▶ 保存先を選んで書き出す（音声）" : "▶ 保存先を選んで書き出す";
 };
 $("pickAudio").onclick = async () => { const f = await window.api.pick("audio"); if (f) { audioFile = f.path; $("audioName").textContent = f.name; } };
 $("pickOverlay").onclick = async () => { const kind = $("overlayMode").value === "image" ? "image" : "video"; const f = await window.api.pick(kind); if (f) { overlayFile = f.path; $("overlayName").textContent = f.name; } };
@@ -92,7 +102,10 @@ function collect() {
     bgmVolume: clampNum($("bgmVolume").value), normalize: $("normalize").checked,
     overlayMode: $("overlayMode").value, overlayFile, overlayPos: $("overlayPos").value,
     overlaySize: clampNum($("overlaySize").value),
+    overlayStart: $("overlayStart").value === "" ? 0 : clampNum($("overlayStart").value),
+    overlayEnd: $("overlayEnd").value === "" ? 0 : clampNum($("overlayEnd").value),
     text: $("text").value, textPos: $("textPos").value, textSize: clampNum($("textSize").value), textColor: $("textColor").value,
+    outFormat: $("outFormat").value, aspect: $("aspect").value,
     crf: clampNum($("crf").value), preset: $("preset").value,
   };
   return o;
@@ -125,7 +138,11 @@ async function execute(opt, defaultName) {
     if (r.log) $("log").textContent += "\n" + r.log;
   }
 }
-function setBusy(b) { $("run").disabled = b || !input; $("cancel").disabled = !b; document.querySelectorAll('[data-quick]').forEach((x) => (x.disabled = b)); }
+function setBusy(b) {
+  $("run").disabled = b || !input; $("cancel").disabled = !b;
+  $("concatRun").disabled = b || concatFiles.length < 2;
+  document.querySelectorAll('[data-quick]').forEach((x) => (x.disabled = b));
+}
 
 /* ---- 書き出し（編集パイプライン） ---- */
 $("run").onclick = async () => {
@@ -133,8 +150,45 @@ $("run").onclick = async () => {
   const o = collect();
   const err = validate(o);
   if (err) { $("status").innerHTML = `<span class="err">${err}</span>`; return; }
+  if ($("savePreset").checked) savePreset();
   const base = input.name.replace(/\.[^.]+$/, "");
-  await execute(o, base + "-edited.mp4");
+  const ext = o.outFormat || "mp4";
+  const suffix = AUDIO_FMT.includes(ext) ? "-audio" : "-edited";
+  await execute(o, base + suffix + "." + ext);
+};
+
+/* ---- プリセット保存/読込（localStorage・入力ファイルパス等は保存しない） ---- */
+const PRESET_IDS = ["width", "brightness", "contrast", "saturation", "speed", "rotate", "flip", "fadeIn", "fadeOut",
+  "audioMode", "volume", "bgmVolume", "normalize", "overlayMode", "overlayPos", "overlaySize", "overlayStart", "overlayEnd",
+  "text", "textPos", "textSize", "textColor", "outFormat", "aspect", "crf", "preset"];
+function savePreset() {
+  const d = {};
+  PRESET_IDS.forEach((id) => { const el = $(id); if (el) d[id] = el.type === "checkbox" ? el.checked : el.value; });
+  localStorage.setItem("kve_preset", JSON.stringify(d));
+}
+function applyPreset(d) {
+  PRESET_IDS.forEach((id) => { const el = $(id); if (el && d[id] != null) { if (el.type === "checkbox") el.checked = d[id]; else el.value = d[id]; el.dispatchEvent(new Event("input")); el.dispatchEvent(new Event("change")); } });
+}
+$("loadPreset").onclick = () => { const s = localStorage.getItem("kve_preset"); if (s) { applyPreset(JSON.parse(s)); $("status").textContent = "保存した設定を読み込みました。"; } else $("status").textContent = "保存された設定がありません。"; };
+$("resetAll").onclick = () => { localStorage.removeItem("kve_preset"); location.reload(); };
+/* 起動時に前回設定を自動適用 */
+(function () { const s = localStorage.getItem("kve_preset"); if (s) try { applyPreset(JSON.parse(s)); } catch (e) {} })();
+
+/* ---- 連結（concat） ---- */
+let concatFiles = [];
+$("pickConcat").onclick = async () => {
+  const list = await window.api.pickMany("video");
+  if (list.length) {
+    concatFiles = concatFiles.concat(list);
+    $("concatList").innerHTML = "つなぐ順: " + concatFiles.map((f, i) => `${i + 1}. ${f.name}`).join(" / ") + ` <button id="clearConcat" style="margin-left:8px">クリア</button>`;
+    $("clearConcat").onclick = () => { concatFiles = []; $("concatList").textContent = ""; $("concatRun").disabled = true; };
+    $("concatRun").disabled = concatFiles.length < 2;
+  }
+};
+$("concatRun").onclick = async () => {
+  if (concatFiles.length < 2) { $("status").innerHTML = '<span class="err">2本以上選んでください。</span>'; return; }
+  const o = { kind: "concat", inputs: concatFiles.map((f) => f.path), input: concatFiles[0].path, width: clampNum($("width").value) || 1280, outFormat: AUDIO_FMT.includes($("outFormat").value) ? "mp4" : $("outFormat").value, crf: clampNum($("crf").value), preset: $("preset").value };
+  await execute(o, "connected." + o.outFormat);
 };
 $("cancel").onclick = async () => { await window.api.cancel(); $("status").textContent = "中止しました。"; running = false; setBusy(false); };
 $("openOut").onclick = () => { if (lastOutput) window.api.reveal(lastOutput); };
@@ -155,3 +209,8 @@ document.querySelectorAll('[data-quick]').forEach((btn) => {
     await execute(opt, input.name.replace(/\.[^.]+$/, "") + suffix + "." + ext);
   };
 });
+
+/* 初期表示状態を確定 */
+$("outFormat").onchange();
+$("overlayMode").onchange();
+$("audioMode").onchange();

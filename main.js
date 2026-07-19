@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
 const { buildArgs } = require("./ffargs");
-const { buildPipeline } = require("./ffpipeline");
+const { buildPipeline, buildConcat } = require("./ffpipeline");
 
 function ffmpegPath() {
   const p = require("ffmpeg-static");
@@ -70,6 +70,11 @@ app.whenReady().then(async () => {
         await new Promise((r) => setTimeout(r, 2500));
         preview = await win.webContents.executeJavaScript(`(()=>{const v=document.getElementById('vid');return JSON.stringify({readyState:v.readyState,w:v.videoWidth,err:v.error?v.error.code:null})})()`);
       }
+      if (process.env.VE_SMOKE_FULL === "1") {
+        const chk = await win.webContents.executeJavaScript(`(()=>{const ids=['outFormat','aspect','overlayStart','overlayEnd','pickConcat','concatRun','savePreset','loadPreset','textColor'];const missing=ids.filter(i=>!document.getElementById(i));document.querySelectorAll('details').forEach(d=>d.open=true);const of=document.getElementById('outFormat');of.value='mp3';of.onchange();const ab=getComputedStyle(document.getElementById('crfBox')).visibility==='hidden';of.value='mp4';of.onchange();return JSON.stringify({missing,audioBranch:ab})})()`);
+        console.log("UICHECK:" + chk);
+        await new Promise((r) => setTimeout(r, 500));
+      }
       await new Promise((r) => setTimeout(r, 800));
       fs.writeFileSync(out, (await win.webContents.capturePage()).toPNG());
       const ok = !!ffmpegPath() && fs.existsSync(ffmpegPath());
@@ -100,6 +105,16 @@ ipcMain.handle("pick", async (_e, kind) => {
 
 ipcMain.handle("allow-media", (_e, p) => { if (p && fs.existsSync(p)) { allowedMedia.add(p); return "kmedia://load?p=" + encodeURIComponent(p); } return null; });
 
+/* 連結用: 複数ファイルをまとめて選ぶ */
+ipcMain.handle("pick-many", async (_e, kind) => {
+  const r = await dialog.showOpenDialog(win, {
+    title: "連結する動画を選ぶ（複数可）", properties: ["openFile", "multiSelections"],
+    filters: (FILTERS[kind] || FILTERS.video).concat([{ name: "すべて", extensions: ["*"] }]),
+  });
+  if (r.canceled || !r.filePaths.length) return [];
+  return r.filePaths.map((fp) => { allowedMedia.add(fp); return { path: fp, name: path.basename(fp), size: fs.statSync(fp).size, media: "kmedia://load?p=" + encodeURIComponent(fp) }; });
+});
+
 ipcMain.handle("pick-output", async (_e, defaultName) => {
   const ext = path.extname(defaultName).replace(".", "") || "mp4";
   const r = await dialog.showSaveDialog(win, { title: "保存先を選ぶ", defaultPath: defaultName, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
@@ -127,7 +142,9 @@ ipcMain.handle("run", async (e, opt) => {
   let span = to > from ? to - from : (total ? total - from : 0);
   if (opt.speed && Number(opt.speed) !== 1 && span) span = span / Number(opt.speed);
 
-  const args = opt.kind === "quick" ? buildArgs(opt) : buildPipeline(opt);
+  const args = opt.kind === "quick" ? buildArgs(opt)
+    : opt.kind === "concat" ? buildConcat(opt.inputs, opt)
+      : buildPipeline(opt);
   return new Promise((resolve) => {
     const p = spawn(bin, args); current = p; let logBuf = "";
     p.stderr.on("data", (d) => {

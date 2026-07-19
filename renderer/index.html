@@ -150,18 +150,58 @@ pre{white-space:pre-wrap;overflow:auto;max-height:150px;background:#101827;color
           <div><label>色</label><input id="textColor" type="color" value="#ffcc00"></div>
         </div>
       </div>
+      <div id="overlayTimeRow" class="hide g2" style="margin-top:8px">
+        <div><label>重ねの開始（秒）・空欄でずっと</label><input id="overlayStart" type="number" min="0" step="0.1" placeholder="0"></div>
+        <div><label>重ねの終了（秒）</label><input id="overlayEnd" type="number" min="0" step="0.1" placeholder="ずっと"></div>
+      </div>
+    </div></details>
+
+    <details><summary>🔗 複数動画をつなぐ（連結）</summary><div class="body">
+      <p class="muted">選んだ順に1本の動画へつなぎます。サイズ・形式が違ってもOK（横幅と出力フォーマットはSTEP3の設定を使います）。</p>
+      <div class="row" style="margin-top:8px"><button id="pickConcat">🎬 つなぐ動画を選ぶ（複数）</button><button id="concatRun" class="primary" disabled>この順で連結して書き出す</button></div>
+      <div id="concatList" class="muted" style="margin-top:8px"></div>
     </div></details>
   </div>
 
   <!-- STEP 3: 書き出し -->
   <div class="card">
     <h2>STEP 3 — 書き出し</h2>
-    <div class="g2">
-      <div><label>画質（小さいほど高画質・23が標準） <span class="val" id="vCrf">23</span></label><input id="crf" type="range" min="16" max="34" step="1" value="23"></div>
-      <div><label>エンコード速度</label><select id="preset"><option value="veryfast" selected>veryfast（速い・標準）</option><option value="medium">medium（バランス）</option><option value="slow">slow（低速・高圧縮）</option></select></div>
+    <div class="g3">
+      <div><label>出力フォーマット</label>
+        <select id="outFormat">
+          <optgroup label="動画">
+            <option value="mp4" selected>MP4（H.264・標準）</option>
+            <option value="mov">MOV</option>
+            <option value="mkv">MKV</option>
+            <option value="webm">WebM（VP9）</option>
+          </optgroup>
+          <optgroup label="音声だけにする">
+            <option value="mp3">MP3</option>
+            <option value="m4a">M4A（AAC）</option>
+            <option value="wav">WAV</option>
+            <option value="aac">AAC</option>
+          </optgroup>
+        </select>
+      </div>
+      <div><label>画面比率（プリセット）</label>
+        <select id="aspect">
+          <option value="">元のまま</option>
+          <option value="16:9">16:9 横（YouTube）</option>
+          <option value="1:1">1:1 正方形（Instagram）</option>
+          <option value="9:16">9:16 縦（Reels/TikTok/Shorts）</option>
+          <option value="4:3">4:3</option>
+        </select>
+      </div>
+      <div id="crfBox"><label>画質（小さいほど高画質・23が標準） <span class="val" id="vCrf">23</span></label><input id="crf" type="range" min="16" max="34" step="1" value="23"></div>
+    </div>
+    <div id="presetBox"><label>エンコード速度</label><select id="preset"><option value="veryfast" selected>veryfast（速い・標準）</option><option value="medium">medium（バランス）</option><option value="slow">slow（低速・高圧縮）</option></select></div>
+    <div class="row" style="margin-top:10px">
+      <label class="check" style="margin:0"><input id="savePreset" type="checkbox"> この設定を次回も使う（保存）</label>
+      <button id="loadPreset" style="margin-left:auto">保存した設定を読み込む</button>
+      <button id="resetAll">初期化</button>
     </div>
     <div class="row" style="margin-top:12px">
-      <button class="primary" id="run" disabled>▶ 保存先を選んで書き出す（mp4）</button>
+      <button class="primary" id="run" disabled>▶ 保存先を選んで書き出す</button>
       <button class="danger" id="cancel" disabled>■ 中止</button>
       <button id="openOut" class="hide">📂 保存先を開く</button>
     </div>

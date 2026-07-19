@@ -1,6 +1,6 @@
 {
   "name": "kanana-video-editor-desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "動画編集・切り抜き（Windowsデスクトップ版・ネイティブffmpeg同梱・完全オフライン）",
   "main": "main.js",
   "author": "Kanana Studio",

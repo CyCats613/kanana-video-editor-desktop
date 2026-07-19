@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
   pick: (kind) => ipcRenderer.invoke("pick", kind),            // {path,name,size,media}
+  pickMany: (kind) => ipcRenderer.invoke("pick-many", kind),   // [{path,name,size,media}]
   allowMedia: (p) => ipcRenderer.invoke("allow-media", p),     // D&D したファイルを配信許可
   pickOutput: (defaultName) => ipcRenderer.invoke("pick-output", defaultName),
   run: (opt) => ipcRenderer.invoke("run", opt),
